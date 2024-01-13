@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<!--
+
+    You should customize the following placeholders:
+
+- LOGIN.LOGOUT.SERVICE : If you don't know, leave it as is
+- ~/scripts : the path where the boot-shutdown.sh script is stored. 
+- /private/var/log/LOGINLOGOUT/ : the path where the logs are stored. If you don't care about logs, use: /tmp
+- because we will run as a user process when using /private/var/log You will have to create first the LOGINLOGOUT map 
+open terminal
+cd /private/var/log/
+sudo mkdir LOGINLOGOUT
+sudo chmod 777 LOGINLOGOUT (to make the map writable for everyone)
+You also may change the OutPath to a location in you're home dir. Note you Can't use ~ or $HOME by that key.
+this means use full hard target paths. 
+$HOME/log or ~/log WILL NOT WORK its a plist limitation by that key.
+
+-->
+
+<key>Label</key>
+<string>LOGIN.LOGOUT.SERVICE</string>
+
+<key>ProgramArguments</key>
+<array>
+	<string>/bin/sh</string>
+	<string>-c</string>
+	<string>exec ~/scripts/login-logout.sh</string>
+</array>
+
+<!--
+set RunAtLoad false if you don't want that script starts 
+automatically every time that the user logs in.
+-->
+<key>RunAtLoad</key>
+<true/>
+
+<key>StandardOutPath</key>
+<string>/private/var/log/LOGINLOGOUT/login-logout.log</string>
+
+<key>StandardErrorPath</key>
+<string>/private/var/log/LOGINLOGOUT/login-logout.err</string>
+
+<key>ExitTimeOut</key>
+<integer>600</integer>
+
+</dict>
+</plist>
+
