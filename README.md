@@ -1,6 +1,18 @@
 # macos-script-login-logout
 Launchagent script to execute a command or shell script at user login or logout.
 
+# Automatic Install with install.sh
+
+- Open terminal
+- cd $HOME
+- git clone https://github.com/christophecvr/macos-script-login-logout
+- cd macos-script-login-logout
+- source install.sh
+
+That is all. There might be some interactif question asked to you just respond to You're needs.
+
+# Manual Install :
+
 There are two files:
 - login-logout-script.plist
 - login-logout.sh: bash shell script
@@ -12,9 +24,9 @@ Customize the login-logout-script.plist: according explanation in file.
 Then copy the file login-logout-script.plist to $HOME/Library/LaunchAgents/
 
 Customize the login-logout.sh to you're needs
-place it for example $HOME/scripts/ It's what I do all my user scripts ar in a own created map called scripts.
+place it in $HOME/Library/Scripts .
 - Make script executable.
-- chmod 755 $HOME/scripts/login-logout.sh
+- chmod 755 $HOME/Library/Scripts/login-logout.sh
 
 # To start the login logout service
 - open terminal
