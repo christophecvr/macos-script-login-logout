@@ -81,6 +81,9 @@ if [ -f "$GIT_REPO_DIR/login-logout-script.plist" ] && [ -f "$GIT_REPO_DIR/login
   fi
   SCRIPT_PATH="$HOME/Library/Scripts"
   cp -af "$GIT_REPO_DIR/login-logout.sh" $SCRIPT_PATH
+  if [ -f "$GIT_REPO_DIR/WisLibreofficeHistory.sh" ];then
+    cp -af "$GIT_REPO_DIR/WisLibreofficeHistory.sh" $SCRIPT_PATH
+  fi
 else
   echo "SOMETHING WENT WRONG login-logout-script.plist or login-logout.sh not found"
   exit
