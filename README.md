@@ -2,15 +2,15 @@
 Launchagent script to execute a command or shell script at user login or logout.
 This works on macOS High Sierra 10.13.6 Last avbl MacOs on my hardware (mid 2010)
 It will work on the High Sierra and most probably on on some older osx versions.
-The newer I don't I just can't test it. But after Steve Jobs left us Mac is going down like a train in support and hardware.
+The newer I don't I just can't test it.
 
 # Automatic Install with install.sh
 
 - Open terminal
-- cd $HOME
-- git clone https://github.com/christophecvr/macos-script-login-logout
-- cd macos-script-login-logout
-- source install.sh
+- type: cd $HOME
+- type: git clone https://github.com/christophecvr/macos-script-login-logout
+- type: cd macos-script-login-logout
+- type: source install.sh
 
 That is all. There might be some interactif question asked to you just respond to You're needs.
 
