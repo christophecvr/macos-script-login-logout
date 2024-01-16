@@ -47,6 +47,14 @@ If you only wan't to load it manually set the key RunAtLoad into plist to false.
 - to stop
 - launchctl stop LOGIN.LOGOUT.SERVICE
 
+# After changing file login-logout.sh
+unload and reload the service in order to have changes directly applied
+- open terminal
+- type : launchctl unload -w ~/Library/LaunchAgents/login-logout-script.plist
+- type : launchctl load -w ~/Library/LaunchAgents/login-logout-script.plist
+
+Alternatively just logout,login,logout,login and You're changes should be in effect.
+
 ## Links
 
 - [Daemons and Services Programming Guide][1]
