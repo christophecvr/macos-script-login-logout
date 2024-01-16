@@ -1,4 +1,4 @@
-# macos-script-login-logout
+# macOS (macOSX) Login/Logout Script .
 Launchagent script to execute a command or shell script at user login or logout.
 This works on macOS High Sierra 10.13.6 Last avbl MacOs on my hardware (mid 2010)
 It will work on the High Sierra and most probably on on some older osx versions.
