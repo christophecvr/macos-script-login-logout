@@ -34,8 +34,8 @@ if [ "$TEST_PREVIOUS_INSTALL" == "LOGIN.LOGOUT.SERVICE" ];then
     launchctl unload -w ~/Library/LaunchAgents/login-logout-script.plist
     if [ -f "$HOME/Library/Logs/login-logout.log" ];then
       rm -f "$HOME/Library/Logs/login-logout.log"
-	fi
-	if [ -f "$HOME/Library/Logs/login-logout.err" ];then
+    fi
+    if [ -f "$HOME/Library/Logs/login-logout.err" ];then
       rm -f "$HOME/Library/Logs/login-logout.err"
     fi
   else
@@ -63,7 +63,7 @@ else
       if [ -f "$HOME/Library/Logs/login-logout.log" ];then
         rm -f "$HOME/Library/Logs/login-logout.log"
       fi
-	  if [ -f "$HOME/Library/Logs/login-logout.err" ];then
+      if [ -f "$HOME/Library/Logs/login-logout.err" ];then
         rm -f "$HOME/Library/Logs/login-logout.err"
       fi
     else
@@ -93,6 +93,7 @@ if [ -f ~/Library/LaunchAgents/login-logout-script.plist ];then
   echo "You can add command or script in file $SCRIPT_PATH/login-logout.sh"
 fi
 
+echo " "
 echo "Do you Wan't to remove the cloned git repo ? Yes or No"
 read REMOVE_REPO
 if [ "$REMOVE_REPO" == "Yes" ];then
