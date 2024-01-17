@@ -19,6 +19,8 @@ If the user answered Yes to the question to uninstall.  Else the script will be 
 
 After uninstallation User can answer Yes to reinstall the service or No to just have it removed.
 
+After all is done User can choose to keep or remove the cloned git repo.
+
 # Logging of this script.
 
 After Automatic install the logs will be in the users default log directory which is:
