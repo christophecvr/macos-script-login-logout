@@ -4,7 +4,7 @@
 # 2024/01/11
 # Find the office history file if found remove it.
 
-HistoryFile=`find ~/Library -type f -name "org.libreoffice.script.sfl2"`
+HistoryFile=`find ~/Library/Application\ Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments -type f -name "org.libreoffice.script.sfl2"`
 if [ -f "$HistoryFile" ];then
   rm -f "$HistoryFile"
   echo `date "+%Y-%m-%d %H:%M:%S"` "$USER" "Removed $HistoryFile"

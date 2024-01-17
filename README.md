@@ -5,7 +5,7 @@ It will work on the High Sierra and most probably on on some older osx versions.
 The newer I don't I just can't test it. If someone with MacOs higher then High Sierra 10.13.6
 Test this, that would be nice.
 
-# Automatic Install with install.sh
+# Automatic Install and Uninstall with install.sh
 
 - Open terminal
 - type: cd $HOME
@@ -13,7 +13,11 @@ Test this, that would be nice.
 - type: cd macos-script-login-logout
 - type: source install.sh
 
-That is all. There might be some interactif question asked to you just respond to You're needs.
+If the service was already installed and or loaded , the service will first be unloaded and uninstalled.
+
+If the user answered Yes to the question to uninstall.  Else the script will be stopped.
+
+After uninstallation User can answer Yes to reinstall the service or No to just have it removed.
 
 # Manual Install :
 

@@ -24,12 +24,12 @@ function userlogout()
 
 function userlogin()
 {
-	echo `date "+%Y-%m-%d %H:%M:%S"` `whoami` "Logged in"
+  echo `date "+%Y-%m-%d %H:%M:%S"` `whoami` "Logged in"
 
-	# INSERT HERE THE COMMAND OR SCRIPT YOU WANT EXECUTE AT USER LOGIN
+  # INSERT HERE THE COMMAND OR SCRIPT YOU WANT EXECUTE AT USER LOGIN
 
-	tail -f /dev/null &
-	wait $!
+  tail -f /dev/null &
+  wait $!
 }
 
 userlogin;
