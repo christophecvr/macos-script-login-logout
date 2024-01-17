@@ -19,6 +19,17 @@ If the user answered Yes to the question to uninstall.  Else the script will be 
 
 After uninstallation User can answer Yes to reinstall the service or No to just have it removed.
 
+# Logging of this script.
+
+After Automatic install the logs will be in the users default log directory which is:
+- $HOME/Library/Logs/login-logout.log
+- $HOME/Library/Logs/login-logout.err
+
+example if You're user alfred it will be /Users/alfred/Library/Logs/login-logout.log
+From out of finder You find the Library map in you're home map.
+But finder uses local language if choosen by user. In dutch for example they call
+the Library map Bibliotheek.
+
 # Manual Install :
 
 There are two files:
