@@ -13,7 +13,6 @@
 # - script files in /Users/<home>/Library/Scipts
 # - Log Files in    /Users/<home>/Library/Logs
 # - Launchagent in  /Users/<home>/LaunchAgents
-
 SERVICE=""
 GIT_REPO_DIR=`pwd`
 cd ~
@@ -31,7 +30,11 @@ if [ "$SERVICE" == "loaded" ];then
   echo "The service is loaded but I can't find the installation"
   echo "I'm unable to remove it clean"
   echo "Aborting the script nothing is done"
-  exit
+  if [ "$0" == "-bash" ];then
+    return
+  else
+    exit
+  fi
 fi
 if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
   echo ""
@@ -43,7 +46,11 @@ if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
   read USER_ANSWER
   if [ "$USER_ANSWER" != "Yes" ];then
     echo "You choosed to abort the process"
-    exit
+    if [ "$0" == "-bash" ];then
+      return
+    else
+      exit
+    fi
   fi
 
   if [ "$SERVICE" == "loadedinstalled" ];then
@@ -90,7 +97,11 @@ if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
       echo "Git repo remains on pc"
       echo
     fi
-    exit
+    if [ "$0" == "-bash" ];then
+      return
+    else
+      exit
+    fi
   fi
 fi
 
