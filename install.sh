@@ -4,102 +4,113 @@
 # 2024/01/14
 
 # This scripts installs the user macos-script-login-logout
+# If the script was already installed it will unload and uninstall this script.
+# All you're previous changes will be lost.
 # The user can set a specific command and or scipt file to be executed 
 # at login or logout it is user based so rights are those from user.
 # Insert you're desired commands or scripts into login-logout.sh script.
+# The script will make use of macos user defult locations.
+# - script files in /Users/<home>/Library/Scipts
+# - Log Files in    /Users/<home>/Library/Logs
+# - Launchagent in  /Users/<home>/LaunchAgents
 
+SERVICE=""
 GIT_REPO_DIR=`pwd`
 cd ~
 
-# Check if there was already a service loaded with previous tests.
+# Check if there was already a service installed and loaded.
 TEST_PREVIOUS_INSTALL=`launchctl list LOGIN.LOGOUT.SERVICE 2>/dev/null | grep -o LOGIN.LOGOUT.SERVICE`
 if [ "$TEST_PREVIOUS_INSTALL" == "LOGIN.LOGOUT.SERVICE" ];then
-  echo "You're service was already installed and loaded"
-  echo "Do You wan't to proceed ? Yes or No"
-  read ANSWER
-  if [ "$ANSWER" == "Yes" ];then
-    BACKUP=`find $HOME/Library/Scripts -maxdepth 1 -type f -name "login-logout.sh"`
-    if [ -f "$BACKUP" ];then
-      cp -af "$BACKUP" "$BACKUP.bak"
-      echo "A backup from login-logout.sh is made with name login-logout.sh.bak"
-    fi
-    echo "Unloading previous installed service"
-    echo "Previous files will be reset to the current"
-    echo "Aded command in login-logout.sh will be gone"
-  else
-    echo "You aborted the installation"
-    exit
-  fi
-  if [ -f ~/Library/LaunchAgents/login-logout-script.plist ];then
-    launchctl unload -w ~/Library/LaunchAgents/login-logout-script.plist
-    if [ -f "$HOME/Library/Logs/login-logout.log" ];then
-      rm -f "$HOME/Library/Logs/login-logout.log"
-    fi
-    if [ -f "$HOME/Library/Logs/login-logout.err" ];then
-      rm -f "$HOME/Library/Logs/login-logout.err"
-    fi
-  else
-    echo "there is something very wrong login-logout-script.plist not found"
-    echo "A previous scipt has been loaded but could not be found in $HOME/Library/LaunchAgents"
-    echo "Maybe you renamed it or loaded it from another location ?"
-    echo "Installation Aborted"
-    exit
-  fi
-else
-  if [ -f ~/Library/LaunchAgents/login-logout-script.plist ];then
-    echo "Warning the login-logout-script.plist already installed but not loaded"
-    echo "If You continue this installation all you're previous changes will be gone."
-    echo "Continue Yes or No ?"
-    read ANSWERB
-    if [ "$ANSWERB" == "Yes" ]; then  
-      echo "We proceed with installation"
-      BACKUP=`find $HOME/Library/Scripts -maxdepth 1 -type f -name "login-logout.sh"`
-      if [ -f "$BACKUP" ] ; then
-        cp -af "$BACKUP" "$BACKUP.bak"
-        echo "A backup from login-logout.sh is made with name login-logout.sh.bak"
-      fi
-      echo "Previous files will be reset to the current"
-      echo "Aded command in login-logout.sh will be gone"
-      if [ -f "$HOME/Library/Logs/login-logout.log" ];then
-        rm -f "$HOME/Library/Logs/login-logout.log"
-      fi
-      if [ -f "$HOME/Library/Logs/login-logout.err" ];then
-        rm -f "$HOME/Library/Logs/login-logout.err"
-      fi
-    else
-      echo "Installation aborted"
-      exit
-    fi
-  fi
+  SERVICE="loaded"
 fi
-
-if [ -f "$GIT_REPO_DIR/login-logout-script.plist" ] && [ -f "$GIT_REPO_DIR/login-logout.sh" ];then
-  cp -af "$GIT_REPO_DIR/login-logout-script.plist" ~/Library/LaunchAgents/
-  if [ ! -d ~/Library/Scripts ] ; then
-    echo "creating directory Scripts in You're home/Library dir"
-    mkdir $HOME/Library/Scripts
-  fi
-  SCRIPT_PATH="$HOME/Library/Scripts"
-  cp -af "$GIT_REPO_DIR/login-logout.sh" $SCRIPT_PATH
-else
-  echo "SOMETHING WENT WRONG login-logout-script.plist or login-logout.sh not found"
+if [ -f "$HOME/Library/LaunchAgents/login-logout-script.plist" ];then
+  SERVICE="$SERVICE""installed"
+fi
+if [ "$SERVICE" == "loaded" ];then
+  echo ""
+  echo "The service is loaded but I can't find the installation"
+  echo "I'm unable to remove it clean"
+  echo "Aborting the script nothing is done"
   exit
 fi
-if [ -f ~/Library/LaunchAgents/login-logout-script.plist ];then
-  sed -i '' "s#SCRIPT_DIR#$SCRIPT_PATH#g" "$HOME/Library/LaunchAgents/login-logout-script.plist"
+if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
+  echo ""
+  echo "A previous installation of this script has been found"
+  echo "If You proceed that installation will be removed"
+  echo "All You're changes to login-logout.sh will be lost"
+  echo ""
+  echo "Do You wan't to proceed Yes or No ?"
+  read USER_ANSWER
+  if [ "$USER_ANSWER" != "Yes" ];then
+    echo "You choosed to abort the process"
+    exit
+  fi
+
+  if [ "$SERVICE" == "loadedinstalled" ];then
+    launchctl unload -w ~/Library/LaunchAgents/login-logout-script.plist
+    echo ""
+    echo "Service unloaded"
+    echo ""
+  fi
+  rm -f "$HOME/Library/LaunchAgents/login-logout-script.plist"
+  echo "$HOME/Library/LaunchAgents/login-logout-script.plist removed"
+  if [ -f "$HOME/Library/Scripts/login-logout.sh" ];then
+    rm -f "$HOME/Library/Scripts/login-logout.sh"
+    echo "$HOME/Library/Scripts/login-logout.sh removed"
+  fi
+  if [ -f "$HOME/Library/Logs/login-logout.err" ];then
+    rm -f "$HOME/Library/Logs/login-logout.err"
+    echo "$HOME/Library/Logs/login-logout.err removed"
+  fi
+  if [ -f "$HOME/Library/Logs/login-logout.log" ];then
+    rm -f "$HOME/Library/Logs/login-logout.log"
+    echo "$HOME/Library/Logs/login-logout.log removed"
+  fi
+  echo ""
+  echo "The previous installation is removed"
+  echo "Do You wan't to reinstall the current version ? Yes or No"
+  read USER_ANSWER2
+  if [ "$USER_ANSWER2" != "Yes" ];then
+    echo ""
+	echo "You choosed to abort the installation of new version"
+    echo ""
+	echo "Do You wan't to remove the git repo ? Yes or No"
+    read USER_ANSWER3
+    if [ "$USER_ANSWER3" == "Yes" ];then
+      rm -rf "$GIT_REPO_DIR"
+      echo ""
+      echo "Git repo removed"
+      echo ""
+    else
+      echo ""
+      echo "Git repo remains on pc"
+      echo
+    fi
+    exit
+  fi
+fi
+
+# Installing The Launchagent service
+if [ -f "$GIT_REPO_DIR/login-logout-script.plist" ] && [ -f "$GIT_REPO_DIR/login-logout.sh" ];then
+  echo "installing script files"
+  cp -af "$GIT_REPO_DIR/login-logout-script.plist" "$HOME/Library/LaunchAgents"
+  cp -af "$GIT_REPO_DIR/login-logout.sh" "$HOME/Library/Scripts"
   sed -i '' "s#USERS_DIR#$HOME#g" "$HOME/Library/LaunchAgents/login-logout-script.plist"
   launchctl load -w ~/Library/LaunchAgents/login-logout-script.plist
-  echo "Service Installed and Loaded"
-  echo "You can add command or script in file $SCRIPT_PATH/login-logout.sh"
 fi
-
-echo " "
-echo "Do you Wan't to remove the cloned git repo ? Yes or No"
-read REMOVE_REPO
-if [ "$REMOVE_REPO" == "Yes" ];then
+echo ""
+echo "	#############################################################################################"
+echo "	###            User LaunchAgent Login-Logout is installed and Loaded"
+echo "	### 	You can ad a command or script in $HOME/Library/Scripts/login-logout.sh"
+echo "	#############################################################################################"
+echo ""
+echo "Do You wan't to remove the git repo from you're pc ? Yes or No"
+read USER_ANSWER4
+if [ "$USER_ANSWER4" == "Yes" ];then
   rm -rf "$GIT_REPO_DIR"
-  echo "git repo removed"
+  echo ""
+  echo "Git repo removed from you're pc"
 else
-  echo "git repo remains on you're pc"
+  echo ""
+  echo "Git repo remains on you're pc"
 fi
-
