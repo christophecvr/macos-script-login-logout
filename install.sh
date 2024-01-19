@@ -16,6 +16,22 @@
 
 SERVICE=""
 GIT_REPO_DIR=`pwd`
+if [ "`echo $GIT_REPO_DIR | grep -o "macos-script-login-logout"`" != "macos-script-login-logout" ]; then
+  echo "$PWD this is not the git repo directory"
+# below using $BASH_SOURCE will always show the script name with the full path used to start
+# iF you start it out of the git repo it will only give script-name here install.sh
+# if you started it from underlying path it will give you that path.
+# means source macos-script-login-logout/install.sh then $BASH_SOURCE = macos-script-login-logout/install.sh
+# This is so on standard bash macos High Sierra could be different on other bash,shell or macos versions.
+  GIT_REPO_DIR="$PWD`echo "/$BASH_SOURCE" | grep "install.sh" | sed s/"\/install.sh"//g`"
+  echo "$GIT_REPO_DIR but this should be the git repo dirextory"
+  
+  if [ "`echo $GIT_REPO_DIR | grep -o "macos-script-login-logout"`" != "macos-script-login-logout" ]; then
+    echo "On You're pc you can only start the script out off git repo directory."
+    echo "Aborting Installation"
+    return 2> /dev/null; exit
+  fi
+fi
 cd ~
 
 # Check if there was already a service installed and loaded.
