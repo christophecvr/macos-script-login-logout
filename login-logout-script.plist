@@ -8,7 +8,8 @@
     Use always full hard paths most plist keys do not support enviroment vars such as ~, $HOME or ... 
 
 - LOGIN.LOGOUT.SERVICE 	: If you don't know, leave it as is
-- USERS_DIR				: Current Users $HOME dir. example /Users/alfred
+- SCRIPT_PATH			: PATH of scriptsfiles   dir. example /Users/alfred/Library/Scripts
+- LOG_PATH				: PATH from logs example /Users/alfred/Library/Logs
 
 -->
 
@@ -17,7 +18,7 @@
 
 <key>ProgramArguments</key>
 <array>
-	<string>USERS_DIR/Library/Scripts/login-logout.sh</string>
+	<string>SCRIPT_PATH/login-logout.sh</string>
 </array>
 
 <!--
@@ -28,10 +29,10 @@ automatically every time that the user logs in.
 <true/>
 
 <key>StandardOutPath</key>
-<string>USERS_DIR/Library/Logs/login-logout.log</string>
+<string>LOG_PATH/login-logout.log</string>
 
 <key>StandardErrorPath</key>
-<string>USERS_DIR/Library/Logs/login-logout.err</string>
+<string>LOG_PATH/login-logout.err</string>
 
 <key>ExitTimeOut</key>
 <integer>600</integer>

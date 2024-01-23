@@ -10,8 +10,7 @@ Test this, that would be nice.
 - Open terminal
 - type: cd $HOME
 - type: git clone https://github.com/christophecvr/macos-script-login-logout
-- type: cd macos-script-login-logout
-- type: source install.sh
+- type: macos-script-login-logout/install.sh
 
 If the service was already installed and or loaded , the service will first be unloaded and uninstalled.
 
@@ -24,6 +23,7 @@ When install,uninstall and or reinstall is done user can choose to keep or remov
 # Logging of this script.
 
 After Automatic install the logs will be in the users default log directory which is:
+
 - $HOME/Library/Logs/login-logout.log
 - $HOME/Library/Logs/login-logout.err
 
@@ -31,6 +31,20 @@ example if You're user alfred it will be /Users/alfred/Library/Logs/login-logout
 From out of finder You find the Library map in you're home map.
 But finder uses local language if choosen by user. In dutch for example they call
 the Library map Bibliotheek.
+
+Off course if during install You change the logs location the logs will be somewhere else.
+There is well a limit You can not set a log path below users home dir. This is the same for the script file
+login-logout.sh You can change the location during install but it must be in You're home dir or above.
+
+- Setting for example log files in a own created path example:
+- /Users/alfred/logs is allowed (the path Must well exist !!)
+- /private/var/logs is not allowed !!!
+
+After Installation there will be a install.log file in
+
+- $HOME/Library/Logs/login-logout-script-install.log
+
+
 
 # Manual Install :
 
