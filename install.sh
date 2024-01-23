@@ -313,9 +313,9 @@ if [ -f "$PLIST_PATH/login-logout-script.plist" ];then
   echo "### Boot shutdown Service is Installed and Loaded"
   echo "### You can add commands or scripts to $SCRIPTS_PATH/login-logout.sh"
   echo "### Do not Forget to unload and reload the service after a change"
-  echo "### To unload type: sudo launchctl unload -w $PLIST_PATH/login-logout-script.plist "
-  echo "### To load type: sudo launchctl load -w $PLIST_PATH/login-logout-script.plist "
-  echo "### Alternatively reboot two times to see the effects of the change."
+  echo "### To unload type: launchctl unload -w $PLIST_PATH/login-logout-script.plist "
+  echo "### To load type: launchctl load -w $PLIST_PATH/login-logout-script.plist "
+  echo "### Alternatively logout,login,logout,login and you should se the effects of change."
   echo "###########################################################################################################"
   rmgitrepo
 else
