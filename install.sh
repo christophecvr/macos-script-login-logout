@@ -310,7 +310,7 @@ if [ -f "$PLIST_PATH/login-logout-script.plist" ];then
   launchctl load -w $PLIST_PATH/login-logout-script.plist
   echo ""
   echo "###########################################################################################################"
-  echo "### Boot shutdown Service is Installed and Loaded"
+  echo "### LOGIN.LOGOUT.SERVICE is Installed and Loaded"
   echo "### You can add commands or scripts to $SCRIPTS_PATH/login-logout.sh"
   echo "### Do not Forget to unload and reload the service after a change"
   echo "### To unload type: launchctl unload -w $PLIST_PATH/login-logout-script.plist "
