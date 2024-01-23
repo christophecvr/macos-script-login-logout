@@ -3,140 +3,332 @@
 # Author christophecvr christophevanr@gmail.com
 # 2024/01/14
 
-# This scripts installs the user macos-script-login-logout
-# If the script was already installed it will unload and uninstall this script.
-# All you're previous changes will be lost.
-# The user can set a specific command and or scipt file to be executed 
-# at login or logout it is user based so rights are those from user.
-# Insert you're desired commands or scripts into login-logout.sh script.
-# The script will make use of macos user defult locations.
-# - script files in /Users/<home>/Library/Scipts
-# - Log Files in    /Users/<home>/Library/Logs
-# - Launchagent in  /Users/<home>/LaunchAgents
+# some default locations
+PLIST_PATH="$HOME/Library/LaunchAgents"
+SCRIPTS_PATH="$HOME/Library/Scripts"
+LOGS_PATH="$HOME/Library/Logs"
 
-SERVICE=""
-GIT_REPO_DIR=`pwd`
-
-if [ "`echo $GIT_REPO_DIR | grep -o "macos-script-login-logout"`" != "macos-script-login-logout" ]; then
-  echo "$PWD this is not the git repo directory"
-# below using $BASH_SOURCE will always show the script name with the full path used to start
-# iF you start it out of the git repo it will only give script-name here install.sh
-# if you started it from underlying path it will give you that path.
-# means source macos-script-login-logout/install.sh then $BASH_SOURCE = macos-script-login-logout/install.sh
-# This is so on standard bash macos High Sierra could be different on other bash,shell or macos versions.
-  GIT_REPO_DIR="$PWD`echo "/$BASH_SOURCE" | grep "install.sh" | sed s/"\/install.sh"//g`"
-  echo "$GIT_REPO_DIR but this should be the git repo dirextory"
-  
-  if [ "`echo $GIT_REPO_DIR | grep -o "macos-script-login-logout"`" != "macos-script-login-logout" ]; then
-    echo "On You're pc you can only start the script out off git repo directory."
-    echo "Aborting Installation"
-    return 2> /dev/null; exit
-  fi
+GIT_REPO_DIR="$PWD"
+#echo $GIT_REPO_DIR
+if [ "`echo "$GIT_REPO_DIR" | grep -o "macos-script-login-logout"`" != "macos-script-login-logout" ]; then
+  #echo "$PWD This is not the git repo directory"
+  GIT_REPO_LOC=`echo "/$BASH_SOURCE" | sed s/"\.\/"//g | sed s/"install.sh"//g | sed 's/\/*$//g'`
+  GIT_REPO_DIR="$PWD$GIT_REPO_LOC"
+  #echo "$GIT_REPO_DIR But this should be the git repo"
 fi
 
-cd ~
+cd $HOME
+if [ ! -f "$GIT_REPO_DIR/login-logout-script.plist" ] || [ ! -f "$GIT_REPO_DIR/login-logout.sh" ];then
+  echo "Could not find the files to install or uninstall aborting process"
+  return 2> /dev/null ; exit
+#else
+  #echo "git is cloned ok install can go"
+fi
 
-# Check if there was already a service installed and loaded.
+function rmgitrepo()
+{
+  echo ""
+  echo "####################################################################################"
+  echo "### Install,Uninstall and or reinstall is done"
+  echo "### Or you aborted installation"
+  echo "### Do You wan't to remove the cloned git repository:"
+  echo "### $GIT_REPO_DIR  ?"
+  echo "### Answer Yes or No ***** !!! Default is NO !!! ******"
+  echo "####################################################################################"
+  echo ""
+  read ANSWER
+  if [ "$ANSWER" == "Yes" ] || [ "$ANSWER" == "yes" ];then
+    rm -rf $GIT_REPO_DIR
+    echo ""
+    echo "################################################################################"
+    echo "### GIT repository macos-script-login-logout is removed from you're pc"
+    echo "################################################################################"
+  fi
+}
+
+echo ""
+echo "########################################################################"
+echo "### Git repository macos-script-login-logout is cloned and found"
+echo "### I ask you some questions "
+echo "### "
+echo "### Git repo path: $GIT_REPO_DIR"
+echo "### You're home path: $HOME"
+echo "### The Installing user (You): $USER"
+echo "###"
+echo "### Are the mentioned paths above right ? Yes/No  default Yes"
+echo "########################################################################"
+echo ""
+read ANSWER
+if [ "$ANSWER" == "No" ] || [ "$ANSWER" == "no" ];then
+  echo ""
+  echo "#############################################################################"
+  echo "### You answered No are you shure the info is wrong ? You always can retry"
+  echo "### If the info is not the right one automatic installation is not posible"
+  echo "### Aborting installation"
+  echo "#############################################################################"
+  echo ""
+  echo ""
+  return 2> /dev/null ; exit
+fi
+ANSWER=""
+echo ""
+
 TEST_PREVIOUS_INSTALL=`launchctl list LOGIN.LOGOUT.SERVICE 2>/dev/null | grep -o LOGIN.LOGOUT.SERVICE`
 if [ "$TEST_PREVIOUS_INSTALL" == "LOGIN.LOGOUT.SERVICE" ];then
   SERVICE="loaded"
+  echo "Service Loaded"
 fi
-if [ -f "$HOME/Library/LaunchAgents/login-logout-script.plist" ];then
-  SERVICE="$SERVICE""installed"
-fi
-if [ "$SERVICE" == "loaded" ];then
-  echo ""
-  echo "The service is loaded but I can't find the installation"
-  echo "I'm unable to remove it clean"
-  echo "Aborting the script nothing is done"
-  return 2> /dev/null; exit
+if [ -f "$HOME/Library/Logs/login-logout-script-install.log" ];then
+  echo "installog found"
+  INSTALLED_SCRIPTS_PATH=`grep "SCRIPTS_PATH" $HOME/Library/Logs/login-logout-script-install.log | sed s/"SCRIPTS_PATH = "//g`
+  # echo $INSTALLED_SCRIPTS_PATH
+  INSTALLED_LOGS_PATH=`grep "LOGS_PATH" $HOME/Library/Logs/login-logout-script-install.log | sed s/"LOGS_PATH = "//g`
+  # echo $INSTALLED_LOGS_PATH
+  if [ -f $PLIST_PATH/login-logout-script.plist ] && [ -f $INSTALLED_SCRIPTS_PATH/login-logout.sh ];then
+    SERVICE="$SERVICE""installed"
+    echo "Service installed"
+    echo "########################################################################################################"
+    echo "### !!! If You wan't to reinstall this service after uninstalling do You wan't to keep You're path's !!!"
+    echo "###"
+    echo "### PLIST_PATH = $PLIST_PATH"
+    echo "### SCRIPTS_PATH = $INSTALLED_SCRIPTS_PATH"
+    echo "### LOGS_PATH = $INSTALLED_LOGS_PATH"
+    echo "###"
+    echo "### Yes or No ? default is No. By default MacOs default paths will be used."
+    echo "########################################################################################################"
+    echo ""
+    read KEEP_PATHS
+    if [ "$KEEP_PATHS" == "Yes" ];then
+      SCRIPTS_PATH="$INSTALLED_SCRIPTS_PATH"
+      LOGS_PATH="$INSTALLED_LOGS_PATH"
+      echo "paths changed to those from previous installation"
+      KEEP_PATHS=""
+    fi
+  else
+    echo ""
+    echo "##############################################################################################"
+    echo "### I did found a previous installog but no installation removing the installlog"
+    echo "##############################################################################################"
+    rm -f $HOME/Library/Logs/login-logout-script-install.log
+  fi
+else
+  # echo "No installog found try to find installation on default locations"
+  if [ -f $PLIST_PATH/login-logout-script.plist ] && [ -f $SCRIPTS_PATH/login-logout.sh ];then
+    echo "Did found installation on default location whitout installog"
+    SERVICE="$SERVICE""installed"
+    INSTALLED_SCRIPTS_PATH=$SCRIPTS_PATH
+    INSTALLED_LOGS_PATH=$LOGS_PATH
+  else
+    if [ -f $PLIST_PATH/login-logout-script.plist ];then
+      echo ""
+      echo "#########################################################################################################################"
+      echo "##### ****** !!! A $PLIST_PATH/login-logout-script.plist is found !!!!!********"
+      echo "##### This script does not find the login-logout.sh file ."
+      echo "##### Most probably You did previousely a manual installation"
+      echo "##### Or used this script with non standard paths and removed the $HOME/Library/Logs/login-logout-script-install.log"
+      echo "##### If so first remove that installation manualy before using this script"
+      echo "##### Uninstall and or Install process aborted"
+      echo "##########################################################################################################################"
+      echo "" 
+      return 2> /dev/null ; exit
+    fi   
+  fi
 fi
 if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
   echo ""
-  echo "A previous installation of this script has been found"
-  echo "If You proceed that installation will be removed"
-  echo "All You're changes to login-logout.sh will be lost"
+  echo "#########################################################################################################"
+  echo "### A previous installation is found"
+  echo "### By uninstalling you're changes into login-logout.sh will be lost"
+  echo "### Do you wan't to continu ? Yes or No default Yes"
+  echo "#########################################################################################################"
   echo ""
-  echo "Do You wan't to proceed Yes or No ?"
-  read USER_ANSWER
-  if [ "$USER_ANSWER" != "Yes" ];then
-    echo "You choosed to abort the process"
-    return 2> /dev/null; exit
-  fi
-
+  read ANSWER
+  if [ "$ANSWER" == "No" ] || [ "$ANSWER" == "no" ];then
+    echo ""
+    echo "###########################################################################################"
+    echo "###*** You selected to STOP the Install/Uninstalling process ***"
+    echo "###########################################################################################"
+    echo ""
+    return 2> /dev/null ; exit
+  fi    
   if [ "$SERVICE" == "loadedinstalled" ];then
-    launchctl unload -w ~/Library/LaunchAgents/login-logout-script.plist
-    echo ""
-    echo "Service unloaded"
-    echo ""
+    launchctl unload -w $PLIST_PATH/login-logout-script.plist
+    echo "unloading service"
   fi
-  rm -f "$HOME/Library/LaunchAgents/login-logout-script.plist"
-  echo "$HOME/Library/LaunchAgents/login-logout-script.plist removed"
-  if [ -f "$HOME/Library/Scripts/login-logout.sh" ];then
-    rm -f "$HOME/Library/Scripts/login-logout.sh"
-    echo "$HOME/Library/Scripts/login-logout.sh removed"
+  echo "removing previous installation"
+  rm -f $PLIST_PATH/login-logout-script.plist
+  rm -f $INSTALLED_SCRIPTS_PATH/login-logout.sh
+  if [ -f "$INSTALLED_SCRIPTS_PATH/WisLibreofficeHistory.sh" ];then
+    rm -f $INSTALLED_SCRIPTS_PATH/WisLibreofficeHistory.sh
   fi
-  if [ -f "$HOME/Library/Scripts/WisLibreofficeHistory.sh" ];then
-    rm -f "$HOME/Library/Scripts/WisLibreofficeHistory.sh"
-    echo "$HOME/Library/Scripts/WisLibreofficeHistory.sh removed"
+  if [ -f "$INSTALLED_LOGS_PATH/login-logout.log" ];then
+    rm -f $INSTALLED_LOGS_PATH/login-logout.log
   fi
-  if [ -f "$HOME/Library/Logs/login-logout.err" ];then
-    rm -f "$HOME/Library/Logs/login-logout.err"
-    echo "$HOME/Library/Logs/login-logout.err removed"
-  fi
-  if [ -f "$HOME/Library/Logs/login-logout.log" ];then
-    rm -f "$HOME/Library/Logs/login-logout.log"
-    echo "$HOME/Library/Logs/login-logout.log removed"
+  if [ -f "$INSTALLED_LOGS_PATH/login-logout.err" ];then
+    rm -f $INSTALLED_LOGS_PATH/login-logout.err
   fi
   echo ""
-  echo "The previous installation is removed"
-  echo "Do You wan't to reinstall the current version ? Yes or No"
-  read USER_ANSWER2
-  if [ "$USER_ANSWER2" != "Yes" ];then
-    echo ""
-	echo "You choosed to abort the installation of new version"
-    echo ""
-	echo "Do You wan't to remove the git repo ? Yes or No"
-    read USER_ANSWER3
-    if [ "$USER_ANSWER3" == "Yes" ];then
-      rm -rf "$GIT_REPO_DIR"
-      echo ""
-      echo "Git repo removed"
-      echo ""
-    else
-      echo ""
-      echo "Git repo remains on pc"
-      echo
+  echo "############################################################################################################"
+  echo "### Previous installation has been unloaded and removed"
+  echo "### Do you wan't to reinstall the service Yes or No !!!*** Default is Yes ***!!!"
+  echo "############################################################################################################"
+  echo ""
+  read ANSWER
+  if [ "$ANSWER" == "No" ] || [ "$ANSWER" == "no" ];then
+    if [ -f "/Library/Logs/login-logout-script-install.log" ];then
+      rm -f "/Library/Logs/login-logout-script-install.log"
     fi
-    return 2> /dev/null; exit
+    echo ""
+    echo "#########################################################"
+    echo "### You selected to NOT Reinstall The service"
+    echo "### Previous installation is removed"
+    echo "#########################################################"
+    rmgitrepo
+    return 2> /dev/null ; exit
+  fi
+else
+  if [ "$SERVICE" == "loaded" ];then
+    echo ""
+    echo "#########################################################################################################################"
+    echo "##### ****** !!! A LOADED LOGIN.LOGOUT.SERVICE has been found but no installation !!! ********"
+    echo "##### This script does not find the installation self."
+    echo "##### Most probably You did previousely a manual installation"
+    echo "##### Or used this script with non standard paths and removed the $HOME/Library/Logs/login-logout-script-install.log"
+    echo "##### If so first remove that installation manualy before using this script"
+    echo "##### Uninstall and or Install process aborted"
+    echo "##########################################################################################################################"
+    echo ""
+    return 2> /dev/null ; exit
   fi
 fi
 
-# Installing The Launchagent service
-if [ -f "$GIT_REPO_DIR/login-logout-script.plist" ] && [ -f "$GIT_REPO_DIR/login-logout.sh" ];then
-  echo "installing script files"
-  cp -af "$GIT_REPO_DIR/login-logout-script.plist" "$HOME/Library/LaunchAgents"
-  cp -af "$GIT_REPO_DIR/login-logout.sh" "$HOME/Library/Scripts"
-  sed -i '' "s#USERS_DIR#$HOME#g" "$HOME/Library/LaunchAgents/login-logout-script.plist"
-  if [ -f "$GIT_REPO_DIR/WisLibreofficeHistory.sh" ];then
-    echo "installing WisLibreofficeHistory.sh"
-    cp -af "$GIT_REPO_DIR/WisLibreofficeHistory.sh" "$HOME/Library/Scripts"
+echo ""
+echo "##########################################################################################################"
+echo "### This script is a user Launchagent"
+echo "### It will perform the command or scripts You insert in the login-logout.sh"
+echo "### All actions are done with user autorithy so you can't do actions on system maps"
+echo "### This script will install the files login-logout.sh and login-logout-script.plist on MacOs(x)"
+echo "### Default user paths in users $HOME DIR locations "
+echo "### The owner ship of installed files will all be $USER also the login-logout.sh"
+echo "### I well will give you the opportunity to change the locations off"
+echo "### login-logout.sh script file and logs files but select only paths in or above $HOME"
+echo "### Use only full hard target paths if You change one of the locations"
+echo "### #####################################################################################################"
+echo ""
+echo "#####################################################################################################################################"
+echo "### $SCRIPTS_PATH = The default login-logout.sh location Do You wan't to change it ? Yes/No default No"
+echo "#####################################################################################################################################"
+read ANSWER
+if [ "$ANSWER" == "Yes" ];then
+  echo "#########################################################################################"
+  echo "### Insert the wanted Location"
+  echo "#########################################################################################"
+  read ANSWER
+  if [ -d "$ANSWER" ] && [ "`echo $ANSWER | grep -o "$HOME"`" == "$HOME" ];then
+    SCRIPTS_PATH="$ANSWER"
+  else
+    echo ""
+    echo "############################################################################################"
+    echo "### Not a correct path keeping default $SCRIPTS_PATH"
+    echo "############################################################################################"
   fi
-  launchctl load -w ~/Library/LaunchAgents/login-logout-script.plist
+  ANSWER=""
 fi
 echo ""
-echo "	#############################################################################################"
-echo "	###            User LaunchAgent Login-Logout is installed and Loaded"
-echo "	### 	You can ad a command or script in $HOME/Library/Scripts/login-logout.sh"
-echo "	#############################################################################################"
+echo "##############################################################################################################"
+echo "### $LOGS_PATH = The default log location. Do You wan't to change it ? Yes/No default No"
+echo "##############################################################################################################"
+read ANSWER
+if [ "$ANSWER" == "Yes" ] && [ "`echo $ANSWER | grep -o "$HOME"`" == "$HOME" ];then
+  echo "#############################################"
+  echo "### Insert the wanted location"
+  echo "#############################################"
+  read ANSWER
+  if [ -d "$ANSWER" ];then
+    LOGS_PATH="$ANSWER"
+  else
+    echo ""
+    echo "#####################################################################"
+    echo "### Not a correct path keeping default $LOGS_PATH"
+    echo "#####################################################################"
+  fi
+  ANSWER=""
+fi
 echo ""
-echo "Do You wan't to remove the git repo from you're pc ? Yes or No"
-read USER_ANSWER4
-if [ "$USER_ANSWER4" == "Yes" ];then
-  rm -rf "$GIT_REPO_DIR"
+echo "############################################################################"
+echo "### The current install paths are:"
+echo "###"
+echo "### $PLIST_PATH plist file"
+echo "### $SCRIPTS_PATH script-files"
+echo "### $LOGS_PATH Log files"
+echo "###"
+echo "### If You're happy with the paths we can proceed with the installation"
+echo "### Do You wan't to proceed Yes/No default Yes"
+echo "#############################################################################"
+
+read ANSWER
+if [ "$ANSWER" == "No" ];then
   echo ""
-  echo "Git repo removed from you're pc"
+  echo "#######################################################"
+  echo "#### You Aborted The Installation"
+  echo "#######################################################"
+  return 2> /dev/null ; exit
+fi
+
+cp -f "$GIT_REPO_DIR/login-logout-script.plist" "$PLIST_PATH"
+cp -af "$GIT_REPO_DIR/login-logout.sh" "$SCRIPTS_PATH"
+if [ -f "$GIT_REPO_DIR/WisLibreofficeHistory.sh" ];then
+  cp -af "$GIT_REPO_DIR/WisLibreofficeHistory.sh" "$SCRIPTS_PATH"
+fi
+sed -i '' "s#SCRIPT_PATH#$SCRIPTS_PATH#g" "$PLIST_PATH/login-logout-script.plist"
+sed -i '' "s#LOG_PATH#$LOGS_PATH#g" "$PLIST_PATH/login-logout-script.plist"
+
+echo "Installation completed"
+echo "Making a install Report"
+INSTALL_LOG="$HOME/Library/Logs/login-logout-script-install.log"
+if [ ! -f "$INSTALL_LOG" ];then
+touch $INSTALL_LOG
+fi
+echo ""
+echo "######################################################" > $INSTALL_LOG
+echo "Login-Logout-Install-report"  >> $INSTALL_LOG
+echo "######################################################" >> $INSTALL_LOG
+echo "" >> $INSTALL_LOG
+echo "`date "+%Y-%m-%d %H:%M:%S"` $USER Installed macos-script-login-logout" >> $INSTALL_LOG
+echo "" >> $INSTALL_LOG
+echo "" >> $INSTALL_LOG
+echo "Install Locations" >> $INSTALL_LOG
+echo "" >> $INSTALL_LOG
+echo "GIT_REPO_DIR = $GIT_REPO_DIR" >> $INSTALL_LOG
+echo "PLIST_PATH = $PLIST_PATH" >> $INSTALL_LOG
+echo "SCRIPTS_PATH = $SCRIPTS_PATH" >> $INSTALL_LOG
+echo "LOGS_PATH = $LOGS_PATH" >> $INSTALL_LOG
+echo "" >> $INSTALL_LOG
+echo "#################################################################" >> $INSTALL_LOG
+echo "macos-script-login-logout INSTALLED" >> $INSTALL_LOG
+echo "#################################################################" >> $INSTALL_LOG
+echo "" >> $INSTALL_LOG
+echo ""
+echo "#################################################################"
+echo "$INSTALL_LOG is completed"
+echo "#################################################################"
+if [ -f "$PLIST_PATH/login-logout-script.plist" ];then
+  launchctl load -w $PLIST_PATH/login-logout-script.plist
+  echo ""
+  echo "###########################################################################################################"
+  echo "### Boot shutdown Service is Installed and Loaded"
+  echo "### You can add commands or scripts to $SCRIPTS_PATH/login-logout.sh"
+  echo "### Do not Forget to unload and reload the service after a change"
+  echo "### To unload type: sudo launchctl unload -w $PLIST_PATH/login-logout-script.plist "
+  echo "### To load type: sudo launchctl load -w $PLIST_PATH/login-logout-script.plist "
+  echo "### Alternatively reboot two times to see the effects of the change."
+  echo "###########################################################################################################"
+  rmgitrepo
 else
   echo ""
-  echo "Git repo remains on you're pc"
+  echo "###############################################################"
+  echo "### Could not find the service due to a unknown error "
+  echo "### !!! Installation failed !!!"
+  echo "###############################################################"
 fi
+
