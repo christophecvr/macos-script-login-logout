@@ -11,10 +11,19 @@ LOGS_PATH="$HOME/Library/Logs"
 GIT_REPO_DIR="$PWD"
 #echo $GIT_REPO_DIR
 if [ "`echo "$GIT_REPO_DIR" | grep -o "macos-script-login-logout"`" != "macos-script-login-logout" ]; then
-  #echo "$PWD This is not the git repo directory"
-  GIT_REPO_LOC=`echo "/$BASH_SOURCE" | sed s/"\.\/"//g | sed s/"install.sh"//g | sed 's/\/*$//g'`
-  GIT_REPO_DIR="$PWD$GIT_REPO_LOC"
-  #echo "$GIT_REPO_DIR But this should be the git repo"
+  if [ "`echo "$0" | grep -o "install.sh"`" == "install.sh" ];then
+    echo "script running on it's own subshell"
+    echo "$PWD This is not the git repo directory"
+    GIT_REPO_LOC=`echo "/$0" | sed s/"\.\/"//g | sed s/"install.sh"//g | sed 's/\/*$//g'`
+    GIT_REPO_DIR="$PWD$GIT_REPO_LOC"
+    echo "$GIT_REPO_DIR But this should be the git repo"
+  else
+    echo "script is sourced"
+    echo "$PWD This is not the git repo directory"
+    GIT_REPO_LOC=`echo "/$BASH_SOURCE" | sed s/"\.\/"//g | sed s/"install.sh"//g | sed 's/\/*$//g'`
+    GIT_REPO_DIR="$PWD$GIT_REPO_LOC"
+    echo "$GIT_REPO_DIR But this should be the git repo"
+  fi
 fi
 
 cd $HOME
@@ -43,6 +52,7 @@ function rmgitrepo()
     echo "################################################################################"
     echo "### GIT repository macos-script-login-logout is removed from you're pc"
     echo "################################################################################"
+    echo ""
   fi
 }
 
@@ -87,18 +97,18 @@ if [ -f "$HOME/Library/Logs/login-logout-script-install.log" ];then
   if [ -f $PLIST_PATH/login-logout-script.plist ] && [ -f $INSTALLED_SCRIPTS_PATH/login-logout.sh ];then
     SERVICE="$SERVICE""installed"
     echo "Service installed"
-    echo "########################################################################################################"
-    echo "### !!! If You wan't to reinstall this service after uninstalling do You wan't to keep You're path's !!!"
+    echo "############################################################################################################"
+    echo "### !!! If You want to reinstall this service after uninstalling do You want to keep You're path's !!!"
     echo "###"
     echo "### PLIST_PATH = $PLIST_PATH"
     echo "### SCRIPTS_PATH = $INSTALLED_SCRIPTS_PATH"
     echo "### LOGS_PATH = $INSTALLED_LOGS_PATH"
     echo "###"
-    echo "### Yes or No ? default is No. By default MacOs default paths will be used."
-    echo "########################################################################################################"
+    echo "### Yes or No ? !!!! default is No !!!!. By default MacOs default paths will be used."
+    echo "############################################################################################################"
     echo ""
     read KEEP_PATHS
-    if [ "$KEEP_PATHS" == "Yes" ];then
+    if [ "$KEEP_PATHS" == "Yes" ] || [ "$KEEP_PATHS" == "yes" ];then
       SCRIPTS_PATH="$INSTALLED_SCRIPTS_PATH"
       LOGS_PATH="$INSTALLED_LOGS_PATH"
       echo "paths changed to those from previous installation"
@@ -149,6 +159,7 @@ if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
     echo "###*** You selected to STOP the Install/Uninstalling process ***"
     echo "###########################################################################################"
     echo ""
+    rmgitrepo
     return 2> /dev/null ; exit
   fi    
   if [ "$SERVICE" == "loadedinstalled" ];then
@@ -175,8 +186,8 @@ if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
   echo ""
   read ANSWER
   if [ "$ANSWER" == "No" ] || [ "$ANSWER" == "no" ];then
-    if [ -f "/Library/Logs/login-logout-script-install.log" ];then
-      rm -f "/Library/Logs/login-logout-script-install.log"
+    if [ -f "$HOME/Library/Logs/login-logout-script-install.log" ];then
+      rm -f "$HOME/Library/Logs/login-logout-script-install.log"
     fi
     echo ""
     echo "#########################################################"
@@ -198,12 +209,13 @@ else
     echo "##### Uninstall and or Install process aborted"
     echo "##########################################################################################################################"
     echo ""
+    rmgitrepo
     return 2> /dev/null ; exit
   fi
 fi
 
 echo ""
-echo "##########################################################################################################"
+echo "#######################################################################################################################"
 echo "### This script is a user Launchagent"
 echo "### It will perform the command or scripts You insert in the login-logout.sh"
 echo "### All actions are done with user autorithy so you can't do actions on system maps"
@@ -213,16 +225,19 @@ echo "### The owner ship of installed files will all be $USER also the login-log
 echo "### I well will give you the opportunity to change the locations off"
 echo "### login-logout.sh script file and logs files but select only paths in or above $HOME"
 echo "### Use only full hard target paths if You change one of the locations"
-echo "### #####################################################################################################"
+echo "### ###################################################################################################################"
 echo ""
-echo "#####################################################################################################################################"
-echo "### $SCRIPTS_PATH = The default login-logout.sh location Do You wan't to change it ? Yes/No default No"
-echo "#####################################################################################################################################"
+echo "##########################################################################################################################################"
+echo "### $SCRIPTS_PATH = The default or previous login-logout.sh location Do You wan't to change it ? Yes/No default No"
+echo "##########################################################################################################################################"
+echo ""
 read ANSWER
 if [ "$ANSWER" == "Yes" ];then
+  echo ""
   echo "#########################################################################################"
   echo "### Insert the wanted Location"
   echo "#########################################################################################"
+  echo ""
   read ANSWER
   if [ -d "$ANSWER" ] && [ "`echo $ANSWER | grep -o "$HOME"`" == "$HOME" ];then
     SCRIPTS_PATH="$ANSWER"
@@ -231,6 +246,7 @@ if [ "$ANSWER" == "Yes" ];then
     echo "############################################################################################"
     echo "### Not a correct path keeping default $SCRIPTS_PATH"
     echo "############################################################################################"
+    echo ""
   fi
   ANSWER=""
 fi
@@ -238,24 +254,28 @@ echo ""
 echo "##############################################################################################################"
 echo "### $LOGS_PATH = The default log location. Do You wan't to change it ? Yes/No default No"
 echo "##############################################################################################################"
+echo ""
 read ANSWER
 if [ "$ANSWER" == "Yes" ] && [ "`echo $ANSWER | grep -o "$HOME"`" == "$HOME" ];then
+  echo ""
   echo "#############################################"
   echo "### Insert the wanted location"
   echo "#############################################"
+  echo ""
   read ANSWER
   if [ -d "$ANSWER" ];then
     LOGS_PATH="$ANSWER"
   else
     echo ""
-    echo "#####################################################################"
+    echo "############################################################################"
     echo "### Not a correct path keeping default $LOGS_PATH"
-    echo "#####################################################################"
+    echo "############################################################################"
+    echo ""
   fi
   ANSWER=""
 fi
 echo ""
-echo "############################################################################"
+echo "################################################################################################"
 echo "### The current install paths are:"
 echo "###"
 echo "### $PLIST_PATH plist file"
@@ -264,14 +284,16 @@ echo "### $LOGS_PATH Log files"
 echo "###"
 echo "### If You're happy with the paths we can proceed with the installation"
 echo "### Do You wan't to proceed Yes/No default Yes"
-echo "#############################################################################"
+echo "################################################################################################"
 
 read ANSWER
-if [ "$ANSWER" == "No" ];then
+if [ "$ANSWER" == "No" ] || [ "$ANSWER" == "no" ];then
   echo ""
   echo "#######################################################"
   echo "#### You Aborted The Installation"
   echo "#######################################################"
+  echo ""
+  rmgitrepo
   return 2> /dev/null ; exit
 fi
 
@@ -315,14 +337,15 @@ echo "#################################################################"
 if [ -f "$PLIST_PATH/login-logout-script.plist" ];then
   launchctl load -w $PLIST_PATH/login-logout-script.plist
   echo ""
-  echo "###########################################################################################################"
+  echo "###############################################################################################################"
   echo "### LOGIN.LOGOUT.SERVICE is Installed and Loaded"
   echo "### You can add commands or scripts to $SCRIPTS_PATH/login-logout.sh"
   echo "### Do not Forget to unload and reload the service after a change"
   echo "### To unload type: launchctl unload -w $PLIST_PATH/login-logout-script.plist "
   echo "### To load type: launchctl load -w $PLIST_PATH/login-logout-script.plist "
   echo "### Alternatively logout,login,logout and login now you should see the effects of You're change."
-  echo "###########################################################################################################"
+  echo "################################################################################################################"
+  echo ""
   rmgitrepo
 else
   echo ""
@@ -330,5 +353,7 @@ else
   echo "### Could not find the service due to a unknown error "
   echo "### !!! Installation failed !!!"
   echo "###############################################################"
+  echo ""
+  rmgitrepo
 fi
 
