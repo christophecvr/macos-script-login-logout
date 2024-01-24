@@ -172,8 +172,8 @@ if [ "$SERVICE" == "loadedinstalled" ] || [ "$SERVICE" == "installed" ];then
   echo ""
   read ANSWER
   if [ "$ANSWER" == "No" ] || [ "$ANSWER" == "no" ];then
-    if [ -f "/Library/Logs/login-logout-script-install.log" ];then
-      rm -f "/Library/Logs/login-logout-script-install.log"
+    if [ -f "$HOME/Library/Logs/login-logout-script-install.log" ];then
+      rm -f "$HOME/Library/Logs/login-logout-script-install.log"
     fi
     echo ""
     echo "#########################################################"
